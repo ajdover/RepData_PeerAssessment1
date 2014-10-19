@@ -119,6 +119,7 @@ median(DataFile.day.new$steps)
 # Do thesse values differ from the estimates in the first part of the assignment?
 Mean is 0.55 lower than the first part of the assignment
 Median is 3.0 lower than the first part of the assignment.
+These differences are negligible given the data.
 
 # What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -129,21 +130,24 @@ The shape of the histogram is similar, but the overall frequencies are higher si
 # Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 ```{r}
-WeekdayOfDate <- weekdays(DataFile.new$date, abbreviate = FALSE)
-DataFile.new$WeekendWeekday <- vector(length=length(DataFile.new$steps))
-
-DataFile.new$WeekendWeekday[WeekdayOfDate=="Sunday" | WeekdayOfDate=="Saturday"] <- "Weekend"
-DataFile.new$WeekendWeekday[WeekdayOfDate!="Sunday" | WeekdayOfDate!="Saturday"] <= "Weekday"
-
-DataFile.new$WeekendWeekday <- as.factor(DataFile.new$WeekendWeekday)
+DataFile.new$weekdays <- factor(format(DataFile.new$date, '%A'))
+levels(DataFile.new$weekdays)
+levels(DataFile.new$weekdays) <- list("weekday" = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekend" = c("Saturday", "Sunday"))
 ```
 
 # Make a panel plot containing the Time Series plot 
 
 ```{r}
-DataFile.new.mean.interval <- aggregate(DataFile.new$steps, list(DataFile.new$interval, DataFile.new$WeekendWeekday),mean)
-par(mfrow = c(2,1))
-plot(DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekend",1], DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekend",3], xlab = "Interval", ylab = "Avg Number of steps", type="l", main="Weekend", xlim=c(15,20), ylim=c(0,250))
-plot(DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekday",1], DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekday",3], xlab = "Interval", ylab = "Avg Number of steps", type="l",main="Weekday", xlim=c(15,20), ylim=c(0,250))
+DataFile.new.mean.interval <- aggregate(DataFile.new$steps, by=list(DataFile.new$weekdays, DataFile.new$interval), mean, na.rm=TRUE, na.action=NULL)
+names(DataFile.new.mean.interval)[1] <- "weekday"
+names(DataFile.new.mean.interval)[2] <- "interval"
+names(DataFile.new.mean.interval)[3] <- "mean.steps"
+
+library(lattice)
+#xplot(DataFile.new.mean.interval$mean.steps ~ DataFile.new.mean.interval$interval | DataFile.new interval$weekday,
+#      layout=c(1,2)
+#      type="l"
+#      xlab = "Interval"
+#      ylab = "Number of steps")
 ```
 
