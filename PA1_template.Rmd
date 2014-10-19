@@ -61,7 +61,7 @@ plot(DataFile.mean.interval$interval, DataFile.mean.interval$mean.steps, type="n
      main="Time Series Plot per 5-minute Interval",
      xlab = "5=minute Intervals",
      ylab = "Average number of steps taken")
-lines(Data.File.mean.interval$interval, DataFile.mean.interval$mean.steps, type="l")
+lines(DataFile.mean.interval$interval, DataFile.mean.interval$mean.steps, type="l")
 ```
 
 # Which 5-minute Interval, on average across all the days in the dataset, contains the maximum number of steps
@@ -80,14 +80,14 @@ sum(is.na(DataFile$steps))
 # Devise a strategy for filling in all the missing values in the dataset
 ```{r}
 #merge dataframes
-DataFile.missing <- merge(DataFile, DataFile.mean.interval, by "interval", sort=FALSE)
+DataFile.missing <- merge(DataFile, DataFile.mean.interval, by = "interval", sort=FALSE)
 #sort and fill in missing steps with the mean steps
 DataFile.missing <- DataFile.missing[with(DataFile.missing, order(date, interval)), ]
 DataFile.missing$steps[is.na(DataFile.missing$steps)] <- DataFile.missing$mean.steps[is.na(DataFile.missing$steps)]
 #clean up mean column
 DataFile.missing$mean.steps <- NULL
 #round steps to remove fractional values
-DataFrame.missing$steps <- round(DataFile.missing$steps, digits = 0)
+DataFile.missing$steps <- round(DataFile.missing$steps, digits = 0)
 ```
 
 # Create a new dataset that is equal to the original dataset but with the missing values filled in
@@ -117,8 +117,8 @@ Median number of steps taken per day
 median(DataFile.day.new$steps)
 ```
 # Do thesse values differ from the estimates in the first part of the assignment?
-Mean is the same
-Median is lower
+Mean is 0.55 lower than the first part of the assignment
+Median is 3.0 lower than the first part of the assignment.
 
 # What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -129,24 +129,18 @@ The shape of the histogram is similar, but the overall frequencies are higher si
 # Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 ```{r}
-DataFile.new$weekdays <- factor(format(DataFile.new$date, '%A'))
-levels(DataFile.new$weekdays)
-levels(DataFile.new$weekdays) <- list("weekday" = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekend" = c("Saturday", "Sunday"))
+WeekdayOfDate <- weekdays(DataFile.new$date, abbreviate = FALSE)
+DataFile.new$WeekendWeekday[WeekdayOfDate=="Sunday" | WeekdayOfDate=="Saturday"] <- "Weekend"
+DataFile.new$WeekendWeekday[WeekdayOfDate!="Sunday" | WeekdayOfDate!="Saturday"] <= "Weekday"
+DataFile.new$WeekendWeekday <- as.factor(DataFile.new$WeekendWeekday)
 ```
 
 # Make a panel plot containing the Time Series plot 
 
 ```{r}
-DataFile.new.mean.interval <- aggregate(DataFile.new$steps, by=list(DataFile.new$weekdays, DataFile.new$interval), mean, na.rm=TRUE, na.action=NULL)
-names(DataFile.new.mean.interval)[1] <- "weekday"
-names(DataFile.new.mean.interval)[2] <- "interval"
-names(DataFile.new.mean.interval)[3] <- "mean.steps"
+DataFile.new.mean.interval <- DataFile.new[,list(meanSteps = mean(steps, na.rm=TRUE)), list(dayType, interval)]
 
-library(lattice)
-xplot(DataFile.new.mean.interval$mean.steps ~ DataFile.new.mean.interval$interval | DataFile.new interval$weekday,
-      layout=c(1,2),
-      type="l",
-      xlab = "Interval",
-      ylab = "Number of steps")
+ggplot(DataFrame.new.mean.interval, aes(x=interval, y-meanSteps, color=dayType)) + geom_line() + facet_wrap(~ dayTime, nrow=2) + theme(legend.position="none")
+
 ```
 
