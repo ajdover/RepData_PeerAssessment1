@@ -130,17 +130,20 @@ The shape of the histogram is similar, but the overall frequencies are higher si
 
 ```{r}
 WeekdayOfDate <- weekdays(DataFile.new$date, abbreviate = FALSE)
+DataFile.new$WeekendWeekday <- vector(length=length(DataFile.new$steps))
+
 DataFile.new$WeekendWeekday[WeekdayOfDate=="Sunday" | WeekdayOfDate=="Saturday"] <- "Weekend"
 DataFile.new$WeekendWeekday[WeekdayOfDate!="Sunday" | WeekdayOfDate!="Saturday"] <= "Weekday"
+
 DataFile.new$WeekendWeekday <- as.factor(DataFile.new$WeekendWeekday)
 ```
 
 # Make a panel plot containing the Time Series plot 
 
 ```{r}
-DataFile.new.mean.interval <- DataFile.new[,list(meanSteps = mean(steps, na.rm=TRUE)), list(dayType, interval)]
-
-ggplot(DataFrame.new.mean.interval, aes(x=interval, y-meanSteps, color=dayType)) + geom_line() + facet_wrap(~ dayTime, nrow=2) + theme(legend.position="none")
-
+DataFile.new.mean.interval <- aggregate(DataFile.new$steps, list(DataFile.new$interval, DataFile.new$WeekendWeekday),mean)
+par(mfrow = c(2,1))
+plot(DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekend",1], DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekend",3], xlab = "Interval", ylab = "Avg Number of steps", type="l", main="Weekend", xlim=c(15,20), ylim=c(0,250))
+plot(DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekday",1], DataFile.new.mean.interval[DataFile.new.mean.interval$Group.2=="weekday",3], xlab = "Interval", ylab = "Avg Number of steps", type="l",main="Weekday", xlim=c(15,20), ylim=c(0,250))
 ```
 
